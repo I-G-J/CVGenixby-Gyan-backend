@@ -1,0 +1,90 @@
+{
+  "id": "technical",
+  "name": "Technical",
+  "description": "A technical-focused resume emphasizing skills and projects",
+  "data": {
+    "title": "My Resume",
+    "resumeName": "Custom Resume Name",
+    "color": "black",
+    "personal": {
+      "fullName": "Alex Chen",
+      "email": "alex.chen@email.com",
+      "phone": "(555) 456-7890",
+      "location": "Seattle, WA",
+      "linkedin": "linkedin.com/in/alexchen",
+      "github": "github.com/alexchen",
+      "portfolio": "alexchen.dev"
+    },
+    "summary": "Senior Software Engineer with 8+ years of experience in distributed systems and cloud architecture. Expert in Python, Go, and Kubernetes. Passionate about building scalable solutions.",
+    "skills": {
+      "languages": "Python, Go, Java, Rust, TypeScript, SQL",
+      "frameworks": "Django, FastAPI, Gin, React, Next.js",
+      "tools": "Kubernetes, Docker, AWS, GCP, Terraform, Prometheus"
+    },
+    "projects": [
+      {
+        "title": "Microservices Platform",
+        "description": "Designed and implemented a cloud-native microservices platform serving 1M+ requests/day",
+        "technologies": "Go, Kubernetes, gRPC, PostgreSQL, Redis",
+        "link": "github.com/alexchen/microservices"
+      },
+      {
+        "title": "ML Pipeline System",
+        "description": "Built an automated ML pipeline for model training and deployment",
+        "technologies": "Python, TensorFlow, Airflow, MLflow",
+        "link": "github.com/alexchen/ml-pipeline"
+      },
+      {
+        "title": "Real-time Analytics Dashboard",
+        "description": "Created a real-time analytics dashboard processing 10K events/second",
+        "technologies": "React, Node.js, WebSocket, InfluxDB",
+        "link": "github.com/alexchen/analytics"
+      }
+    ],
+    "experiences": [
+      {
+        "company": "CloudTech Solutions",
+        "role": "Senior Software Engineer",
+        "startDate": "2019-03",
+        "endDate": "Present",
+        "description": "Leading the development of distributed systems, mentoring junior engineers, and architecting cloud solutions"
+      },
+      {
+        "company": "DataCorp",
+        "role": "Software Engineer",
+        "startDate": "2016-06",
+        "endDate": "2019-02",
+        "description": "Developed data processing pipelines and real-time analytics systems"
+      }
+    ],
+    "educations": [
+      {
+        "institution": "MIT",
+        "degree": "Master of Science",
+        "field": "Computer Science",
+        "startYear": "2014",
+        "endYear": "2016",
+        "grade": "4.0 GPA"
+      },
+      {
+        "institution": "UC Berkeley",
+        "degree": "Bachelor of Science",
+        "field": "Computer Science",
+        "startYear": "2010",
+        "endYear": "2014",
+        "grade": "3.9 GPA"
+      }
+    ],
+    "achievements": "Presented research on distributed caching at a major industry conference.\nContributed to the Go programming language open-source project.",
+    "certificates": [
+      {
+        "name": "Certified Kubernetes Administrator (CKA)",
+        "description": "Issued by The Linux Foundation, 2021"
+      },
+      {
+        "name": "Google Professional Cloud Architect",
+        "description": "Issued by Google Cloud, 2020"
+      }
+    ]
+  }
+}

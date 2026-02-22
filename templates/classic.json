@@ -1,0 +1,66 @@
+{
+  "id": "classic",
+  "name": "Classic",
+  "description": "A simple, professional resume template",
+  "data": {
+    "title": "My Resume",
+    "resumeName": "Custom Resume Name",
+    "color": "black",
+    "personal": {
+      "fullName": "YourName Here",
+      "email": "Youremail@email.com",
+      "phone": "+91 8252xxxxx",
+      "location": "Your City, Country",
+      "linkedin": "linkedin.com/in/yourlinkedin",
+      "github": "github.com/yourgithub",
+      "portfolio": "yourportfolio.com"
+    },
+    "summary": "Experienced professional with 5+ years of experience in software development. Skilled in building scalable web applications and leading cross-functional teams.",
+    "skills": {
+      "languages": "JavaScript, Python, Java, SQL",
+      "frameworks": "React, Node.js, Express, Django",
+      "tools": "Git, Docker, AWS, Jenkins"
+    },
+    "projects": [
+      {
+        "title": "E-commerce Platform",
+        "description": "Built a full-stack e-commerce platform serving 10,000+ users",
+        "technologies": "React, Node.js, MongoDB, Stripe",
+        "link": "github.com/yourgithub/ecommerce"
+      }
+    ],
+    "experiences": [
+      {
+        "company": "Tech Corp",
+        "role": "Senior Software Engineer",
+        "startDate": "2020-01",
+        "endDate": "Present",
+        "description": "Led development of microservices architecture, mentored junior developers"
+      },
+      {
+        "company": "Startup Inc",
+        "role": "Software Engineer",
+        "startDate": "2018-01",
+        "endDate": "2019-12",
+        "description": "Developed customer-facing web applications using React and Node.js"
+      }
+    ],
+    "educations": [
+      {
+        "institution": "University of Technology",
+        "degree": "Bachelor of Science",
+        "field": "Computer Science",
+        "startYear": "2023",
+        "endYear": "2026",
+        "grade": "9.4 GPA"
+      }
+    ],
+    "achievements": "Received 'Employee of the Month' award twice for outstanding performance.\nSuccessfully migrated a legacy system to a modern tech stack, improving performance by 30%.",
+    "certificates": [
+      {
+        "name": "AWS Certified Solutions Architect - Associate",
+        "description": "Issued by Amazon Web Services, 2022"
+      }
+    ]
+  }
+}

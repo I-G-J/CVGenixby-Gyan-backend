@@ -1,0 +1,87 @@
+{
+  "id": "executive",
+  "name": "Executive",
+  "description": "A formal, senior-level resume for executive positions",
+  "data": {
+    "title": "My Resume",
+    "resumeName": "Custom Resume Name",
+    "color": "black",
+    "personal": {
+      "fullName": "Michael Roberts",
+      "email": "michael.roberts@email.com",
+      "phone": "(555) 321-0987",
+      "location": "Chicago, IL",
+      "linkedin": "linkedin.com/in/michaelroberts",
+      "github": "",
+      "portfolio": "michaelroberts.io"
+    },
+    "summary": "Strategic technology leader with 15+ years of experience driving digital transformation and business growth. Proven track record of building high-performing teams and delivering enterprise-scale solutions.",
+    "skills": {
+      "languages": "Java, Python, C#, JavaScript",
+      "frameworks": "Spring Boot, .NET Core, Angular, React",
+      "tools": "AWS, Azure, Jira, Confluence, ServiceNow"
+    },
+    "projects": [
+      {
+        "title": "Enterprise Digital Transformation",
+        "description": "Led a $50M digital transformation initiative resulting in 40% operational efficiency improvement",
+        "technologies": "Cloud Architecture, Agile, DevOps",
+        "link": ""
+      },
+      {
+        "title": "Customer Portal Platform",
+        "description": "Spearheaded development of a customer self-service portal serving 500K+ users",
+        "technologies": "Java, Angular, Kubernetes, PostgreSQL",
+        "link": ""
+      }
+    ],
+    "experiences": [
+      {
+        "company": "GlobalTech Industries",
+        "role": "VP of Engineering",
+        "startDate": "2018-01",
+        "endDate": "Present",
+        "description": "Leading engineering organization of 200+ engineers, driving technical strategy and platform modernization"
+      },
+      {
+        "company": "Fortune 500 Company",
+        "role": "Director of Software Engineering",
+        "startDate": "2014-06",
+        "endDate": "2017-12",
+        "description": "Managed multiple product teams, delivered enterprise applications, and established engineering best practices"
+      },
+      {
+        "company": "Tech Startup",
+        "role": "Senior Engineering Manager",
+        "startDate": "2010-03",
+        "endDate": "2014-05",
+        "description": "Built and led engineering team from 5 to 50 people, scaled platform to handle 10M users"
+      }
+    ],
+    "educations": [
+      {
+        "institution": "Harvard Business School",
+        "degree": "Master of Business Administration",
+        "field": "General Management",
+        "startYear": "2008",
+        "endYear": "2010",
+        "grade": ""
+      },
+      {
+        "institution": "Stanford University",
+        "degree": "Bachelor of Science",
+        "field": "Computer Science",
+        "startYear": "2004",
+        "endYear": "2008",
+        "grade": "3.7 GPA"
+      }
+    ],
+    "achievements": "Recognized as 'Top 40 Under 40' by Tech Innovators Magazine.\nLed a successful $100M Series C funding round.",
+    "certificates": [
+      {
+        "name": "Project Management Professional (PMP)",
+        "description": "Issued by Project Management Institute"
+      }
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "id": "modern",
+  "name": "Modern",
+  "description": "A contemporary resume with skill bars and visual elements",
+  "data": {
+    "title": "My Resume",
+    "resumeName": "Custom Resume Name",
+    "color": "black",
+    "personal": {
+      "fullName": "Sarah Johnson",
+      "email": "sarah.johnson@email.com",
+      "phone": "(555) 987-6543",
+      "location": "San Francisco, CA",
+      "linkedin": "linkedin.com/in/sarahjohnson",
+      "github": "github.com/sarahjohnson",
+      "portfolio": "sarahjohnson.dev"
+    },
+    "summary": "Creative full-stack developer with a passion for building user-friendly applications. 6 years of experience in startups and tech companies.",
+    "skills": {
+      "languages": "JavaScript, TypeScript, Go, Rust",
+      "frameworks": "React, Next.js, Vue.js, Svelte",
+      "tools": "Figma, Vercel, Supabase, GraphQL"
+    },
+    "projects": [
+      {
+        "title": "AI Task Manager",
+        "description": "Built an intelligent task management app with AI-powered suggestions",
+        "technologies": "React, Python, OpenAI API, PostgreSQL",
+        "link": "github.com/sarahjohnson/ai-tasks"
+      },
+      {
+        "title": "Real-time Chat App",
+        "description": "Developed a scalable chat application with WebSocket support",
+        "technologies": "Node.js, Socket.io, Redis, Docker",
+        "link": "github.com/sarahjohnson/chat-app"
+      }
+    ],
+    "experiences": [
+      {
+        "company": "InnovateTech",
+        "role": "Full Stack Developer",
+        "startDate": "2021-06",
+        "endDate": "Present",
+        "description": "Building and maintaining customer-facing applications, implementing CI/CD pipelines"
+      },
+      {
+        "company": "WebSolutions Agency",
+        "role": "Frontend Developer",
+        "startDate": "2019-03",
+        "endDate": "2021-05",
+        "description": "Developed responsive websites for clients using React and modern CSS"
+      }
+    ],
+    "educations": [
+      {
+        "institution": "Stanford Online",
+        "degree": "Professional Certificate",
+        "field": "Full Stack Web Development",
+        "startYear": "2018",
+        "endYear": "2019",
+        "grade": ""
+      }
+    ],
+    "achievements": "Winner of the 2021 InnovateTech Hackathon.\nPublished a popular open-source component with over 10k weekly downloads.",
+    "certificates": [
+      {
+        "name": "React Nanodegree",
+        "description": "Issued by Udacity, 2020"
+      }
+    ]
+  }
+}
