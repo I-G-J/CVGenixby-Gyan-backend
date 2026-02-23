@@ -56,7 +56,8 @@ const resumeSchema = new mongoose.Schema({
   },
   certificates: [{
     name: { type: String, default: '' },
-    description: { type: String, default: '' }
+    description: { type: String, default: '' },
+    link: { type: String, default: '' }
   }],
   atsScore: {
     type: Number,

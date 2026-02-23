@@ -21,6 +21,73 @@ const ensureProtocol = (url) => {
   return `https://${url}`;
 };
 
+// Helper to parse formatted text (markdown style)
+// Supports: **bold**, *italic*, __underline__
+const renderFormattedText = (doc, text, xPos, yPos, options = {}) => {
+  if (!text) return yPos;
+
+  const { width = 495, align = 'left', fontSize = 8, color = '#333333' } = options;
+  
+  // Split text by formatting markers
+  const parts = [];
+  let lastIndex = 0;
+  const regex = /(\*\*[^*]+\*\*|\*[^*]+\*|__[^_]+__)/g;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    // Add text before formatting
+    if (match.index > lastIndex) {
+      parts.push({ text: text.substring(lastIndex, match.index), format: 'normal' });
+    }
+
+    // Add formatted text
+    const formatted = match[0];
+    if (formatted.startsWith('**') && formatted.endsWith('**')) {
+      parts.push({ text: formatted.slice(2, -2), format: 'bold' });
+    } else if (formatted.startsWith('*') && formatted.endsWith('*')) {
+      parts.push({ text: formatted.slice(1, -1), format: 'italic' });
+    } else if (formatted.startsWith('__') && formatted.endsWith('__')) {
+      parts.push({ text: formatted.slice(2, -2), format: 'underline' });
+    }
+
+    lastIndex = match.index + formatted.length;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push({ text: text.substring(lastIndex), format: 'normal' });
+  }
+
+  // If no formatting found, just render as normal
+  if (parts.length === 0) {
+    doc.fillColor(color).fontSize(fontSize).font('Helvetica').text(text, xPos, yPos, { width, align });
+    return yPos + doc.heightOfString(text, { width, align });
+  }
+
+  // Render each part with appropriate formatting
+  let currentY = yPos;
+  const lineHeight = fontSize * 1.2;
+
+  parts.forEach(part => {
+    switch (part.format) {
+      case 'bold':
+        doc.fillColor(color).fontSize(fontSize).font('Helvetica-Bold').text(part.text, xPos, currentY, { width, align, continued: true });
+        break;
+      case 'italic':
+        doc.fillColor(color).fontSize(fontSize).font('Helvetica-Oblique').text(part.text, xPos, currentY, { width, align, continued: true });
+        break;
+      case 'underline':
+        doc.fillColor(color).fontSize(fontSize).font('Helvetica').text(part.text, xPos, currentY, { width, align, continued: true, underline: true });
+        break;
+      default:
+        doc.fillColor(color).fontSize(fontSize).font('Helvetica').text(part.text, xPos, currentY, { width, align, continued: true });
+    }
+  });
+
+  doc.font('Helvetica'); // Reset font
+  return currentY + lineHeight;
+};
+
 // Helper to convert text with bullet points to array
 const parseBulletPoints = (text) => {
   if (!text) return [];
@@ -103,40 +170,46 @@ export const generateResumePDF = (resume) => {
       githubUrl = ensureProtocol(githubUrl);
       portfolioUrl = ensureProtocol(portfolioUrl);
       
-      let linkText = [];
-      if (linkedinUrl) linkText.push('LinkedIn');
-      if (githubUrl) linkText.push('GitHub');
-      if (portfolioUrl) linkText.push('Portfolio');
-      
-      if (linkText.length > 0) {
-        const linkString = linkText.join(' | ');
-        const totalLinkWidth = doc.widthOfString(linkString);
-        const startX = (595 - totalLinkWidth) / 2;
-        
-        // Render the link text
+      if (linkedinUrl || githubUrl || portfolioUrl) {
         doc.fillColor(primaryColor)
            .fontSize(8)
-           .font('Helvetica')
-           .text(linkString, 0, yPos, { width: 595, align: 'center' });
-        
-        // Add clickable link areas
-        let currentX = startX;
+           .font('Helvetica');
+
+        const centerY = yPos;
+
+        let links = [];
+
         if (linkedinUrl) {
-          const linkedinWidth = doc.widthOfString('LinkedIn');
-          // Add link with proper height
-          doc.link(currentX, yPos - 2, linkedinWidth, 12, { uri: linkedinUrl });
-          currentX += linkedinWidth + doc.widthOfString(' | ');
+          links.push({ label: 'LinkedIn', url: linkedinUrl });
         }
         if (githubUrl) {
-          const githubWidth = doc.widthOfString('GitHub');
-          doc.link(currentX, yPos - 2, githubWidth, 12, { uri: githubUrl });
-          currentX += githubWidth + doc.widthOfString(' | ');
+          links.push({ label: 'GitHub', url: githubUrl });
         }
         if (portfolioUrl) {
-          const portfolioWidth = doc.widthOfString('Portfolio');
-          doc.link(currentX, yPos - 2, portfolioWidth, 12, { uri: portfolioUrl });
+          links.push({ label: 'Portfolio', url: portfolioUrl });
         }
-        
+
+        const totalText = links.map(l => l.label).join('   |   ');
+        const textWidth = doc.widthOfString(totalText);
+        let startX = (595 - textWidth) / 2;
+
+        links.forEach((link, index) => {
+          const labelWidth = doc.widthOfString(link.label);
+
+          doc.text(link.label, startX, centerY, {
+            link: link.url,
+            underline: true
+          });
+
+          startX += labelWidth;
+
+          if (index !== links.length - 1) {
+            const separator = '   |   ';
+            doc.text(separator, startX, centerY);
+            startX += doc.widthOfString(separator);
+          }
+        });
+
         yPos += 14;
       }
 
@@ -148,15 +221,66 @@ export const generateResumePDF = (resume) => {
         yPos = addSectionHeader(doc, 'Professional Summary', 50, yPos, primaryColor);
         yPos += 2;
 
-        doc.fillColor(textColor)
-           .fontSize(8)
-           .font('Helvetica')
-           .text(resume.summary, 50, yPos, {
-             width: 495,
-             align: 'justify'
-           });
-        yPos += doc.heightOfString(resume.summary, { width: 495, align: 'justify' }) + 8;
+        // Render formatted summary text
+        yPos = renderFormattedText(doc, resume.summary, 50, yPos, {
+          width: 495,
+          align: 'justify',
+          fontSize: 8,
+          color: textColor
+        }) + 8;
+        
         yPos = addSeparator(doc, primaryColor, yPos);
+      }
+
+      // Education
+      if (resume.educations && resume.educations.length > 0) {
+        const hasEdu = resume.educations.some(e => e.institution || e.degree);
+        if (hasEdu) {
+          if (yPos > 650) {
+            doc.addPage();
+            yPos = 40;
+          }
+
+          yPos = addSectionHeader(doc, 'Education', 50, yPos, primaryColor);
+          yPos += 2;
+
+          resume.educations.forEach((edu) => {
+            if (edu.institution || edu.degree) {
+              if (yPos > 700) {
+                doc.addPage();
+                yPos = 40;
+              }
+
+              doc.fillColor(textColor)
+                 .fontSize(9)
+                 .font('Helvetica-Bold')
+                 .text(edu.degree || 'Degree', 50, yPos);
+              
+              const yearRange = [edu.startYear, edu.endYear].filter(Boolean).join(' - ');
+              if (yearRange) {
+                const yearWidth = doc.widthOfString(yearRange);
+                doc.text(yearRange, 545 - yearWidth, yPos);
+              }
+
+              yPos += 10;
+              doc.fillColor(lightGray)
+                 .fontSize(8)
+                 .font('Helvetica');
+              
+              const eduDetails = [];
+              if (edu.institution) eduDetails.push(edu.institution);
+              if (edu.field) eduDetails.push(edu.field);
+              if (edu.grade) eduDetails.push(`Grade: ${edu.grade}`);
+              
+              if (eduDetails.length > 0) {
+                doc.text(eduDetails.join(' | '), 50, yPos);
+                yPos += 12;
+              }
+            }
+          });
+
+          yPos = addSeparator(doc, primaryColor, yPos);
+        }
       }
 
       // Skills
@@ -287,10 +411,9 @@ export const generateResumePDF = (resume) => {
                 doc.fillColor(primaryColor)
                    .fontSize(8)
                    .font('Helvetica')
-                   .text(linkText, 545 - linkWidth, yPos);
-                // Add link with expanded clickable area
-                doc.link(545 - linkWidth - 5, yPos - 2, linkWidth + 10, 12, {
-                  uri: projectUrl
+                   .text(linkText, 545 - linkWidth, yPos, {
+                     link: projectUrl,
+                     underline: true
                 });
               }
 
@@ -324,57 +447,6 @@ export const generateResumePDF = (resume) => {
                 });
               }
               yPos += 6;
-            }
-          });
-
-          yPos = addSeparator(doc, primaryColor, yPos);
-        }
-      }
-
-      // Education
-      if (resume.educations && resume.educations.length > 0) {
-        const hasEdu = resume.educations.some(e => e.institution || e.degree);
-        if (hasEdu) {
-          if (yPos > 650) {
-            doc.addPage();
-            yPos = 40;
-          }
-
-          yPos = addSectionHeader(doc, 'Education', 50, yPos, primaryColor);
-          yPos += 2;
-
-          resume.educations.forEach((edu) => {
-            if (edu.institution || edu.degree) {
-              if (yPos > 700) {
-                doc.addPage();
-                yPos = 40;
-              }
-
-              doc.fillColor(textColor)
-                 .fontSize(9)
-                 .font('Helvetica-Bold')
-                 .text(edu.degree || 'Degree', 50, yPos);
-              
-              const yearRange = [edu.startYear, edu.endYear].filter(Boolean).join(' - ');
-              if (yearRange) {
-                const yearWidth = doc.widthOfString(yearRange);
-                doc.text(yearRange, 545 - yearWidth, yPos);
-              }
-
-              yPos += 10;
-              doc.fillColor(lightGray)
-                 .fontSize(8)
-                 .font('Helvetica');
-              
-              const eduDetails = [];
-              if (edu.institution) eduDetails.push(edu.institution);
-              if (edu.field) eduDetails.push(edu.field);
-              if (edu.grade) eduDetails.push(`Grade: ${edu.grade}`);
-              
-              if (eduDetails.length > 0) {
-                doc.text(eduDetails.join(' | '), 50, yPos);
-                yPos += 12;
-              }
             }
           });
 
@@ -436,6 +508,21 @@ export const generateResumePDF = (resume) => {
                  .fontSize(9)
                  .font('Helvetica-Bold')
                  .text(cert.name, 50, yPos);
+
+              // Handle certificate link
+              const certUrl = ensureProtocol(cert.link);
+              if (certUrl) {
+                const linkText = 'View Certificate';
+                const linkWidth = doc.widthOfString(linkText);
+                doc.fillColor(primaryColor)
+                   .fontSize(8)
+                   .font('Helvetica')
+                   .text(linkText, 545 - linkWidth, yPos, {
+                     link: certUrl,
+                     underline: true
+                });
+              }
+
               yPos += 9;
 
               if (cert.description) {

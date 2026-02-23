@@ -6,7 +6,136 @@ import { verifyToken } from '../services/auth.js';
 
 const router = express.Router();
 
-// Helper function to sanitize project data
+// ============= VALIDATION FUNCTIONS =============
+
+// Validate URL format
+const validateURL = (url) => {
+  if (!url) return true; // Optional field
+  try {
+    const urlString = String(url).trim();
+    if (!urlString) return true;
+    
+    // Check if it's a valid URL format
+    if (urlString.startsWith('http://') || urlString.startsWith('https://') || 
+        urlString.startsWith('mailto:') || urlString.startsWith('www.')) {
+      try {
+        new URL(urlString.startsWith('www.') ? 'https://' + urlString : urlString);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    return false; // URL without protocol
+  } catch {
+    return false;
+  }
+};
+
+// Validate phone number
+const validatePhoneNumber = (phone) => {
+  if (!phone) return true; // Optional field
+  const phoneString = String(phone).trim();
+  // Remove special characters and check length (7-15 digits valid for most countries)
+  const digitsOnly = phoneString.replace(/\\D/g, '');
+  return digitsOnly.length >= 7 && digitsOnly.length <= 15;
+};
+
+// Validate CGPA/Grade
+const validateCGPA = (cgpa) => {
+  if (!cgpa) return true; // Optional field
+  const cgpaNum = parseFloat(cgpa);
+  return !isNaN(cgpaNum) && cgpaNum >= 0 && cgpaNum <= 10;
+};
+
+// Validate date order
+const validateDateOrder = (start, end) => {
+  if (!start || !end || String(end).toLowerCase() === 'present') return true;
+  
+  const startNum = parseInt(start);
+  const endNum = parseInt(end);
+  
+  if (!isNaN(startNum) && !isNaN(endNum)) {
+    if (/^\\d+$/.test(String(start)) && /^\\d+$/.test(String(end))) {
+      return endNum >= startNum;
+    }
+  }
+
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  
+  if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+    return endDate >= startDate;
+  }
+  
+  return true;
+};
+
+// Comprehensive validation helper
+const validateResumeData = (personal, projects, experiences, educations, certificates) => {
+  const errors = [];
+
+  // Validate personal info
+  if (personal) {
+    if (personal.email && !String(personal.email).includes('@')) {
+      errors.push('Invalid email format');
+    }
+    if (personal.phone && !validatePhoneNumber(personal.phone)) {
+      errors.push('Invalid phone number (must be 7-15 digits)');
+    }
+    if (personal.linkedin && !validateURL(personal.linkedin)) {
+      errors.push('Invalid LinkedIn URL. Include https://');
+    }
+    if (personal.github && !validateURL(personal.github)) {
+      errors.push('Invalid GitHub URL. Include https://');
+    }
+    if (personal.portfolio && !validateURL(personal.portfolio)) {
+      errors.push('Invalid Portfolio URL. Include https://');
+    }
+  }
+
+  // Validate projects
+  if (Array.isArray(projects)) {
+    projects.forEach((proj, idx) => {
+      if (proj.link && !validateURL(proj.link)) {
+        errors.push(`Project ${idx + 1}: Invalid project URL format. Include https://`);
+      }
+    });
+  }
+
+  // Validate experiences
+  if (Array.isArray(experiences)) {
+    experiences.forEach((exp, idx) => {
+      if (exp.startDate && exp.endDate && !validateDateOrder(exp.startDate, exp.endDate)) {
+        errors.push(`Experience ${idx + 1} (${exp.company || 'Unknown'}): End date cannot be before start date`);
+      }
+    });
+  }
+
+  // Validate educations
+  if (Array.isArray(educations)) {
+    educations.forEach((edu, idx) => {
+      if (edu.startYear && edu.endYear && !validateDateOrder(edu.startYear, edu.endYear)) {
+        errors.push(`Education ${idx + 1} (${edu.institution || 'Unknown'}): End year cannot be before start year`);
+      }
+      if (edu.grade && !validateCGPA(edu.grade)) {
+        errors.push(`Education ${idx + 1}: CGPA must be between 0 and 10`);
+      }
+    });
+  }
+
+  // Validate certificates
+  if (Array.isArray(certificates)) {
+    certificates.forEach((cert, idx) => {
+      if (cert.link && !validateURL(cert.link)) {
+        errors.push(`Certificate ${idx + 1}: Invalid URL format. Include https://`);
+      }
+    });
+  }
+
+  return errors;
+};
+
+// ============= SANITIZATION FUNCTIONS =============
 const sanitizeProjects = (projects) => {
   if (!Array.isArray(projects)) return [];
   return projects.map(proj => ({
@@ -25,7 +154,7 @@ const sanitizeExperiences = (experiences) => {
     company: String(exp.company || ''),
     role: String(exp.role || ''),
     startDate: String(exp.startDate || ''),
-    endDate: String(exp.endDate || ''),
+    endDate: String(exp.endDate || '').toLowerCase() === 'present' ? 'Present' : String(exp.endDate || ''),
     description: String(exp.description || '')
   }));
 };
@@ -37,7 +166,19 @@ const sanitizeEducations = (educations) => {
     institution: String(edu.institution || ''),
     degree: String(edu.degree || ''),
     field: String(edu.field || ''),
-    graduationDate: String(edu.graduationDate || '')
+    startYear: String(edu.startYear || ''),
+    endYear: String(edu.endYear || '').toLowerCase() === 'present' ? 'Present' : String(edu.endYear || ''),
+    grade: String(edu.grade || '')
+  }));
+};
+
+// Helper function to sanitize certificates
+const sanitizeCertificates = (certificates) => {
+  if (!Array.isArray(certificates)) return [];
+  return certificates.map(cert => ({
+    name: String(cert.name || ''),
+    description: String(cert.description || ''),
+    link: String(cert.link || '')
   }));
 };
 
@@ -85,6 +226,49 @@ router.post('/', async (req, res) => {
     const sanitizedProjects = sanitizeProjects(projects);
     const sanitizedExperiences = sanitizeExperiences(experiences);
     const sanitizedEducations = sanitizeEducations(educations);
+    const sanitizedCertificates = sanitizeCertificates(certificates);
+
+    // Validate all data comprehensively
+    const validationErrors = validateResumeData(
+      sanitizedPersonal,
+      sanitizedProjects,
+      sanitizedExperiences,
+      sanitizedEducations,
+      sanitizedCertificates
+    );
+    if (validationErrors.length > 0) {
+      // Parse error messages into structured format for frontend
+      const structuredErrors = validationErrors.map(err => {
+        // Extract field name from error message
+        let field = 'general';
+        let message = err;
+        
+        if (err.includes('Personal:')) {
+          field = 'personal';
+          message = err.replace('Personal: ', '');
+        } else if (err.includes('Project')) {
+          field = 'projects';
+          message = err;
+        } else if (err.includes('Experience')) {
+          field = 'experiences';
+          message = err;
+        } else if (err.includes('Education')) {
+          field = 'educations';
+          message = err;
+        } else if (err.includes('Certificate')) {
+          field = 'certificates';
+          message = err;
+        }
+        
+        return { field, message };
+      });
+      
+      return res.status(400).json({ 
+        message: 'Validation failed', 
+        validationErrors: structuredErrors,
+        errors: validationErrors 
+      });
+    }
 
     // Create new resume
     const resume = new Resume({
@@ -98,7 +282,7 @@ router.post('/', async (req, res) => {
       experiences: sanitizedExperiences,
       educations: sanitizedEducations,
       achievements: achievements || '',
-      certificates: certificates || []
+      certificates: sanitizedCertificates
     });
 
     await resume.save();
@@ -185,6 +369,48 @@ router.put('/:id', async (req, res) => {
     const sanitizedProjects = sanitizeProjects(projects);
     const sanitizedExperiences = sanitizeExperiences(experiences);
     const sanitizedEducations = sanitizeEducations(educations);
+    const sanitizedCertificates = sanitizeCertificates(certificates);
+
+    // Validate all data
+    const validationErrors = validateResumeData(
+      sanitizedPersonal,
+      sanitizedProjects,
+      sanitizedExperiences,
+      sanitizedEducations,
+      sanitizedCertificates
+    );
+    if (validationErrors.length > 0) {
+      // Parse error messages into structured format for frontend
+      const structuredErrors = validationErrors.map(err => {
+        let field = 'general';
+        let message = err;
+        
+        if (err.includes('Personal:')) {
+          field = 'personal';
+          message = err.replace('Personal: ', '');
+        } else if (err.includes('Project')) {
+          field = 'projects';
+          message = err;
+        } else if (err.includes('Experience')) {
+          field = 'experiences';
+          message = err;
+        } else if (err.includes('Education')) {
+          field = 'educations';
+          message = err;
+        } else if (err.includes('Certificate')) {
+          field = 'certificates';
+          message = err;
+        }
+        
+        return { field, message };
+      });
+      
+      return res.status(400).json({ 
+        message: 'Validation failed', 
+        validationErrors: structuredErrors,
+        errors: validationErrors 
+      });
+    }
 
     // Find and update resume
     const resume = await Resume.findOneAndUpdate(
@@ -199,7 +425,7 @@ router.put('/:id', async (req, res) => {
         experiences: sanitizedExperiences,
         educations: sanitizedEducations,
         achievements,
-        certificates
+        certificates: sanitizedCertificates
       },
       { new: true, runValidators: true }
     );
