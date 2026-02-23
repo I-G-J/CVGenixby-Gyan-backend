@@ -61,31 +61,37 @@ const renderFormattedText = (doc, text, xPos, yPos, options = {}) => {
   // If no formatting found, just render as normal
   if (parts.length === 0) {
     doc.fillColor(color).fontSize(fontSize).font('Helvetica').text(text, xPos, yPos, { width, align });
-    return yPos + doc.heightOfString(text, { width, align });
+    return doc.y;
   }
 
   // Render each part with appropriate formatting
-  let currentY = yPos;
-  const lineHeight = fontSize * 1.2;
-
-  parts.forEach(part => {
+  parts.forEach((part, index) => {
+    const isLast = index === parts.length - 1;
+    
     switch (part.format) {
       case 'bold':
-        doc.fillColor(color).fontSize(fontSize).font('Helvetica-Bold').text(part.text, xPos, currentY, { width, align, continued: true });
+        doc.font('Helvetica-Bold');
         break;
       case 'italic':
-        doc.fillColor(color).fontSize(fontSize).font('Helvetica-Oblique').text(part.text, xPos, currentY, { width, align, continued: true });
-        break;
-      case 'underline':
-        doc.fillColor(color).fontSize(fontSize).font('Helvetica').text(part.text, xPos, currentY, { width, align, continued: true, underline: true });
+        doc.font('Helvetica-Oblique');
         break;
       default:
-        doc.fillColor(color).fontSize(fontSize).font('Helvetica').text(part.text, xPos, currentY, { width, align, continued: true });
+        doc.font('Helvetica');
+    }
+
+    doc.fillColor(color).fontSize(fontSize);
+    
+    const textOptions = { width, align, continued: !isLast, underline: part.format === 'underline' };
+
+    if (index === 0) {
+      doc.text(part.text, xPos, yPos, textOptions);
+    } else {
+      doc.text(part.text, textOptions);
     }
   });
 
   doc.font('Helvetica'); // Reset font
-  return currentY + lineHeight;
+  return doc.y;
 };
 
 // Helper to convert text with bullet points to array
